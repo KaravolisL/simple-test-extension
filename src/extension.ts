@@ -15,6 +15,18 @@ export function activate(context: vscode.ExtensionContext) {
     testItem.tags = [new vscode.TestTag("TestTag")];
     testController.items.add(testItem);
 
+	testController.createRunProfile("Run", vscode.TestRunProfileKind.Run, (request, token) => {
+		const run = testController.createTestRun(request);
+
+		for (const test of request.include!) {
+			console.log(test);
+			run.started(test);
+			run.passed(test);
+		}
+
+		run.end();
+	});
+
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
@@ -22,7 +34,11 @@ export function activate(context: vscode.ExtensionContext) {
 		// The code you place here will be executed every time your command is executed
 		// Display a message box to the user
 		vscode.window.showInformationMessage('Hello World from test-extension!');
-        console.log(test);
+        
+		const request = new vscode.TestRunRequest([test]);
+		const run = testController.createTestRun(request);
+		run.started(test);
+		run.end();
 	});
 
 	context.subscriptions.push(disposable);
