@@ -3,6 +3,7 @@
 import * as vscode from 'vscode';
 
 const testTag = new vscode.TestTag("TestTag");
+const myWeakMap = new WeakMap<vscode.TestItem, string>();
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -20,8 +21,6 @@ export function activate(context: vscode.ExtensionContext) {
 	testController.createRunProfile("Run", vscode.TestRunProfileKind.Run, async (request, token) => {
 
 		for (const test of request.include!) {
-			console.log(test);
-
             test.busy = true;
 
             await new Promise((resolve) => {
@@ -29,6 +28,10 @@ export function activate(context: vscode.ExtensionContext) {
             });
 
             test.busy = false;
+
+            // Add to weakmap
+            console.log(`Adding ${test.label} to weakmap`);
+            myWeakMap.set(test, test.label);
 		}
 
 	});
@@ -49,6 +52,10 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
         test.busy = false;
+
+        console.log(`Trying to get ${test.label} from weakmap`);
+        const label = myWeakMap.get(test);
+        console.log(`Got ${label} from weakmap`);
 	});
 
 	context.subscriptions.push(disposable);
